@@ -1,9 +1,15 @@
 package org.cloudcmp;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -210,7 +216,7 @@ public class Adaptor {
     }
     
     /**
-     * Measure TCP bandwidth
+     * Measure TCP bandwidth by Iperf3
      * 
      * @param targetAddr	Target address
      * @param transferSize	Transfer size, in unit of MB, must be multiples of 8MB
@@ -263,7 +269,37 @@ public class Adaptor {
     	
     	return (long)(transferSize * 8 / ((double)duration / 1000000000));
     }
-    
+
+    /**
+     * Measure TCP bandwidth
+     *
+     * @param targetAddr	Target address
+     * @param transferSize	Transfer size, in unit of MB, must be multiples of 8MB
+     * @return bandwidth in bps
+     * @throws IOException
+     */
+    public long measureBandwidthByIperf3(String targetAddr, long transferSize) throws IOException{
+        String cmd = "iperf3 -J -c " + targetAddr;
+        try {
+            Process iperfProcess = Runtime.getRuntime().exec(cmd);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(iperfProcess.getInputStream()));
+            String line = null;
+            StringBuilder outputBuilder = new StringBuilder();
+            while((line = reader.readLine()) != null){
+                outputBuilder.append(line);
+            }
+            JSONParser parser = new JSONParser();
+            JSONObject rootObj = (JSONObject)parser.parse(outputBuilder.toString());
+            JSONObject endObj = (JSONObject) rootObj.get("end");
+            JSONObject sumSentObj = (JSONObject) endObj.get("sum_sent");
+            long bytes = (Long) sumSentObj.get("bytes");
+            double seconds = (Double) sumSentObj.get("seconds");
+            return bytes * 8 / (long) seconds;
+        } catch (ParseException e) {
+            throw new IOException("IPERF3 ParseException");
+        }
+    }
+
     /* Management functions */
     public String getExternalIP() {
     	try {

@@ -1,6 +1,8 @@
 package org.cloudcmp.tasks.network;
 
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +22,7 @@ public class BandwidthTask extends Task {
 		super(adaptor);
 		configs.put("target_addr", "127.0.0.1");
 		configs.put("transfer_size", "128");
+		configs.put("method", "default");
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -31,6 +34,7 @@ public class BandwidthTask extends Task {
 		List<String> items = super.getConfigItems();
 		items.add("target_addr");
 		items.add("transfer_size");
+		items.add("method");
 		return items;
 	}
 	
@@ -50,9 +54,15 @@ public class BandwidthTask extends Task {
 			results.put("exception", "invalid transfer_size configuration");
 			return results;
 		}
-		
+
+        String method = configs.get("method");
 		try {
-			long bw = adaptor.measureBandwidth(targetAddr, transferSize * 1000000);
+			long bw = 0;
+			if("iperf3".equals(method)){
+				bw = adaptor.measureBandwidthByIperf3(targetAddr, transferSize * 1000000);
+			} else {
+				bw = adaptor.measureBandwidth(targetAddr, transferSize * 1000000);
+			}
 			results.put("bandwidth", String.valueOf(bw));
 		}
 		catch (IOException e) {

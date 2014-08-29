@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.cloudcmp.services.BandwidthService;
 import org.cloudcmp.services.LatencyService;
+import org.cloudcmp.services.Iperf3Service;
 
 /**
  * The base class of all services
@@ -19,6 +20,7 @@ public class Service implements Runnable {
 		List<Class<? extends Service>> services = new ArrayList<Class<? extends Service>>();
 		services.add(BandwidthService.class);
 		services.add(LatencyService.class);
+		services.add(Iperf3Service.class);
 				
 		Map<String, Class<? extends Service>> serviceMap = new HashMap<String, Class<? extends Service>>();		
 		for (Class<? extends Service> c: services) {
