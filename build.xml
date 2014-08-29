@@ -102,7 +102,7 @@
     <target depends="clean" name="cleanall"/>
 
     <target depends="init" name="build">
-        <javac debug="true" debuglevel="${debuglevel}" destdir="build/classes" source="${source}" target="${target}">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="build/classes" source="${source}" target="${target}" includeantruntime="on">
             <src path="src"/>
             <classpath refid="cloudcmp.classpath"/>
         </javac>
